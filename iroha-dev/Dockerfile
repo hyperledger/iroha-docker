@@ -1,44 +1,78 @@
 #-----------------------------------------------------------------------
-# iroha-dev - IROHA development container (base image for iroha)
+# iroha-dev - IROHA development container
 #
-# build : docker build -t hyperledger/iroha-dev .
+# build : docker build -t soramitsu/iroha-dev .
 #
 # Copyright (c) 2016 Soramitsu,Co.,Ltd.
 # All Rights Reserved.
 #-----------------------------------------------------------------------
-FROM ubuntu
+FROM soramitsu/iroha-base
 
 MAINTAINER Takeshi Yonezu <yonezu@soramitsu.co.jp>
 
-LABEL BUILD="docker build -t hyperledger/iroha-dev ."
+LABEL BUILD="docker build -t soramitsu/iroha-dev ."
+LABEL RUN="docker run -d --name iroha soramitsu/iroha-dev"
 
 USER root
 
 ENV JAVA_HOME /usr/lib/jvm/java-8-openjdk-amd64
-ENV IROHA_HOME=/opt/iroha
+ENV IROHA_HOME /opt/iroha
 
-RUN groupadd -g 168 iroha && \
-    useradd -u 168 -c "IROHA Administrator" -s /bin/bash -m -p $(perl -e "print(crypt('passw0rd', 'sa'));") -g iroha iroha && \
-    usermod -G adm,sudo iroha && \
-    echo "export IROHA_HOME=${IROHA_HOME}" >>/home/iroha/.bashrc && \
-    echo "export JAVA_HOME=${JAVA_HOME}" >>/home/iroha/.bashrc && \
-    echo "export IROHA_HOME=${IROHA_HOME}" >>/root/.bashrc && \
-    echo "export JAVA_HOME=${JAVA_HOME}" >>/root/.bashrc
+WORKDIR /opt
+RUN git clone https://github.com/hyperledger/iroha.git
 
-RUN apt update && apt -y upgrade
+WORKDIR $IROHA_HOME
+RUN git submodule update --init --recursive
 
-RUN apt -y install software-properties-common python-software-properties && \
-    add-apt-repository -y ppa:ubuntu-toolchain-r/test
+RUN apt -y install autoconf automake libtool pkg-config
 
-RUN apt -y install curl git make g++-5 gcc-5 default-jdk && \
-    apt -y install libhdf5-serial-dev libleveldb-dev libsnappy-dev && \
-    apt -y install liblmdb-dev libssl-dev snappy unzip xsltproc zlib1g-dev && \
-    update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-5 20 && \
-    update-alternatives --install /usr/bin/c++ c++ /usr/bin/g++-5 20 && \
-    update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-5 20 && \
-    update-alternatives --install /usr/bin/cc cc /usr/bin/gcc-5 20
+WORKDIR /tmp
+RUN git clone -b v3.0.0 https://github.com/google/protobuf.git
 
-RUN curl -sSL https://cmake.org/files/v3.5/cmake-3.5.2-Linux-x86_64.tar.gz | tar -xzC /opt && \
-    ln -s /opt/cmake*/bin/c* /usr/local/bin
+WORKDIR /tmp/protobuf
+RUN (git cherry-pick 1760feb621a913189b90fe8595fffb74bce84598; echo Force continue) && \
+  ./autogen.sh && \
+  ./configure --prefix=/usr && \
+  make -j 14 && \
+  make install
 
+WORKDIR /tmp
+RUN git clone -b $(curl -L http://grpc.io/release) https://github.com/grpc/grpc
+
+WORKDIR /tmp/grpc
+RUN git submodule update --init && \
+  make && \
+  make install
+
+WORKDIR $IROHA_HOME/core/vendor/leveldb
+RUN make
+WORKDIR $IROHA_HOME/core/vendor/ed25519
+RUN make
+WORKDIR $IROHA_HOME/core/vendor/KeccakCodePackage
+RUN make && make generic64/libkeccak.a
+WORKDIR $IROHA_HOME/core/infra/crypto
+RUN make
+
+RUN mkdir $IROHA_HOME/build
+WORKDIR $IROHA_HOME/build
+RUN cmake ..
+RUN make
+
+ENV IROHA_HOME /usr/local/iroha
+ENV IROHA_SCRIPTS ${IROHA_HOME}/scripts
+RUN mkdir -p ${IROHA_SCRIPTS}
+
+ADD ./img-scripts/init-volume.sh ${IROHA_SCRIPTS}
+ADD ./img-scripts/run-iroha.sh ${IROHA_SCRIPTS}
+ADD ./img-scripts/test.sh ${IROHA_SCRIPTS}
+ADD ./img-scripts/mkiroha-tar.sh ${IROHA_SCRIPTS}
+ADD ./img-scripts/update-binaries.sh ${IROHA_SCRIPTS}
+
+RUN sed -i 's|/opt/iroha|/usr/local/iroha|' /home/iroha/.bashrc && \
+    sed -i 's|/opt/iroha|/usr/local/iroha|' /root/.bashrc
+
+VOLUME $IROHA_HOME
+VOLUME /mnt/iroha
+
+WORKDIR $IROHA_HOME
 CMD ["/bin/bash"]
