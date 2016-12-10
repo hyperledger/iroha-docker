@@ -83,12 +83,12 @@ for ((INDEX=$FIRST; INDEX<=$LAST; INDEX++)); do
     
     fi
 
-    if [[ "IROHA_STATUS" == "false" ]]; then
+    if [[ "$IROHA_STATUS" == "false" ]]; then
         docker rm $CONTAINER_NAME 2> /dev/null
     fi
     
     docker run --name=$CONTAINER_NAME \
                --volumes-from "iroha-data" \
                -v "$IROHA_CONFIG_DIR:/usr/local/iroha/config" \
-               -d soramitsu/iroha-dev /usr/local/iroha/scripts/run-iroha.sh
+               -it soramitsu/iroha-dev #/usr/local/iroha/scripts/run-iroha.sh
 done
