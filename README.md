@@ -31,7 +31,9 @@ You can make changes in your local file system and then build:
 1) ./utils-scripts/bash.sh  
 2) cd /mnt/iroha/build && make
 
-You can now run ./utils-scripts/run-iroha.sh -f 1 -l 4 and the recent changes will take affect.
+You can now run:  
+./utils-scripts/run-iroha.sh -f 1 -l 4  
+and the recent changes will take affect.
 
 ## 3. iroha-build
 [iroha-build](iroha-build/) contains building scripts for IROHA on your non dockernized environment.
