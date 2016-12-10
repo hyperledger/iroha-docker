@@ -72,10 +72,11 @@ for ((INDEX=$FIRST; INDEX<=$LAST; INDEX++)); do
     IROHA_STATUS=$(docker inspect --format="{{ .State.Running }}" $CONTAINER_NAME 2> /dev/null)
     if [[ "$IROHA_STATUS" == "true" ]]; then
         
-        echo -n -e "Iroha container index-$INDEX is already running\n. Press y to restart it, or else to continue."; read RESTART
+        echo -n -e "Iroha container index-$INDEX is already running.\n Press y to restart it, or else to continue.\n"; read RESTART
         if [[ "$RESTART" == "y" ]]; then
             docker stop $CONTAINER_NAME 2> /dev/null
             docker rm $CONTAINER_NAME 2> /dev/null
+            unset $RESTART
         else
             continue
         fi
@@ -86,8 +87,6 @@ for ((INDEX=$FIRST; INDEX<=$LAST; INDEX++)); do
         docker rm $CONTAINER_NAME 2> /dev/null
     fi
     
-    #IROHA_CONFIG_DIR="$CONFIGS_DIR/$INDEX/sumeragi.json"
-    #CONTAINER_NAME="iroha-${INDEX}"
     docker run --name=$CONTAINER_NAME \
                --volumes-from "iroha-data" \
                -v "$IROHA_CONFIG_DIR:/usr/local/iroha/config" \
