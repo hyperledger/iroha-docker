@@ -62,9 +62,9 @@ CONFIGS_DIR=$(realpath "$WORKING_DIR/../configs")
 for ((INDEX=$FIRST; INDEX<=$LAST; INDEX++)); do
 
     echo "container number: $INDEX"
-    IROHA_CONFIG="$CONFIGS_DIR/$INDEX/sumeragi.json"
-    if [[ ! -f $IROHA_CONFIG ]]; then
-        echo "configs directory: $CONFIGS_DIR is missing index: $INDEX"
+    IROHA_CONFIG_DIR="$CONFIGS_DIR/$INDEX"
+    if [[ ! -f "$IROHA_CONFIG_DIR/sumeragi.json" ]]; then
+        echo "config: $CONFIGS_DIR not exists!"
         exit 1
     fi
 
@@ -86,10 +86,10 @@ for ((INDEX=$FIRST; INDEX<=$LAST; INDEX++)); do
         docker rm $CONTAINER_NAME 2> /dev/null
     fi
     
-    #IROHA_CONFIG="$CONFIGS_DIR/$INDEX/sumeragi.json"
+    #IROHA_CONFIG_DIR="$CONFIGS_DIR/$INDEX/sumeragi.json"
     #CONTAINER_NAME="iroha-${INDEX}"
     docker run --name=$CONTAINER_NAME \
                --volumes-from "iroha-data" \
-               -v "${IROHA_CONFIG}:/usr/local/iroha/config" \
-               -it soramitsu/iroha-dev /usr/local/iroha/scripts/run-iroha.sh
+               -v "$IROHA_CONFIG_DIR:/usr/local/iroha/config" \
+               -d soramitsu/iroha-dev /usr/local/iroha/scripts/run-iroha.sh
 done

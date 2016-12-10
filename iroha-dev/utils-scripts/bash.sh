@@ -6,4 +6,4 @@ docker run --name=$CONTAINER_NAME \
            --rm="true" \
            --volumes-from "iroha-data" \
            -it \
-           soramitsu/iroha-dev 
+           soramitsu/iroha-dev

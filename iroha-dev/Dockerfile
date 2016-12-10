@@ -71,8 +71,7 @@ ADD ./img-scripts/update-binaries.sh ${IROHA_SCRIPTS}
 RUN sed -i 's|/opt/iroha|/usr/local/iroha|' /home/iroha/.bashrc && \
     sed -i 's|/opt/iroha|/usr/local/iroha|' /root/.bashrc
 
-VOLUME $IROHA_HOME
 VOLUME /mnt/iroha
 
 WORKDIR $IROHA_HOME
-CMD ["/bin/bash"]
+CMD "/usr/local/iroha/scripts/update-binaries.sh" && "/bin/bash"
