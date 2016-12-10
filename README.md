@@ -6,8 +6,6 @@
 1. iroha-dev
 1. iroha-build
 
-Also, [iroha-build](iroha-build/) contains building scripts for IROHA on your non dockernized environment.
-
 ## 1. iroha-base
 
 This container based on Ubuntu 16.04 and contains project dependencies.
@@ -35,3 +33,6 @@ You can make changes in your local file system and then build:
 
 Run ./utils-scripts/update-binaries.sh to update after build.
 You can now test with ./utils-scripts/run-iroha.sh -f 1 -l 4 (To run four instances of indecies 1 to 4).
+
+## 3. iroha-build
+[iroha-build](iroha-build/) contains building scripts for IROHA on your non dockernized environment.
