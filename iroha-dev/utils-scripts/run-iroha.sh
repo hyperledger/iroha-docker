@@ -90,5 +90,5 @@ for ((INDEX=$FIRST; INDEX<=$LAST; INDEX++)); do
     docker run --name=$CONTAINER_NAME \
                --volumes-from "iroha-data" \
                -v "$IROHA_CONFIG_DIR:/usr/local/iroha/config" \
-               -it soramitsu/iroha-dev #/usr/local/iroha/scripts/run-iroha.sh
+               -d soramitsu/iroha-dev /usr/local/iroha/scripts/run-iroha.sh
 done
