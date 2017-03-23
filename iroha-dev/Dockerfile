@@ -15,6 +15,7 @@ LABEL BUILD="docker build -t hyperledger/iroha-dev ."
 USER root
 
 ENV JAVA_HOME /usr/lib/jvm/java-8-openjdk-amd64
+ENV JAVA_INCLUDE $JAVA_INCLUDE:${JAVA_HOME}/include/linux/
 ENV IROHA_HOME=/opt/iroha
 
 RUN groupadd -g 168 iroha && \
@@ -22,8 +23,10 @@ RUN groupadd -g 168 iroha && \
     usermod -G adm,sudo iroha && \
     echo "export IROHA_HOME=${IROHA_HOME}" >>/home/iroha/.bashrc && \
     echo "export JAVA_HOME=${JAVA_HOME}" >>/home/iroha/.bashrc && \
+    echo "export JAVA_INCLUDE=${JAVA_INCLUDE}" >>/home/iroha/.bashrc && \
     echo "export IROHA_HOME=${IROHA_HOME}" >>/root/.bashrc && \
-    echo "export JAVA_HOME=${JAVA_HOME}" >>/root/.bashrc
+    echo "export JAVA_HOME=${JAVA_HOME}" >>/root/.bashrc && \
+    echo "export JAVA_INCLUDE=${JAVA_INCLUDE}" >>/root/.bashrc
 
 RUN apt update && apt -y upgrade
 
